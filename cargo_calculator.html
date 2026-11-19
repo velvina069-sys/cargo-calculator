@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Расчёт общего груза — Китай</title>
+<style>
+:root{--bg:#f5f6fa;--card:#fff;--ink:#202332;--muted:#707487;--accent:#7356d8;--line:#e5e6ee;--soft:#f0edff}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.45 system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+main{max-width:720px;margin:auto;padding:20px 14px 36px}h1{font-size:25px;line-height:1.2;margin:6px 0}p{color:var(--muted);margin:7px 0 18px}.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:16px;margin:13px 0;box-shadow:0 2px 10px #1b1b2a06}
+h2{font-size:18px;margin:0 0 12px}.grid{display:grid;grid-template-columns:1fr 1fr;gap:11px}label{display:block;font-size:13px;color:var(--muted);margin-bottom:5px}input,select{width:100%;border:1px solid var(--line);border-radius:11px;padding:12px;font:inherit;background:#fff;color:var(--ink);outline:none}input:focus,select:focus{border-color:var(--accent)}.field{margin-bottom:10px}.full{grid-column:1/-1}.result{background:var(--soft);border-radius:14px;padding:13px;margin-top:10px}.row{display:flex;justify-content:space-between;gap:12px;padding:7px 0;align-items:flex-start}.row span:first-child{color:var(--muted)}.row strong{text-align:right}.total{font-size:20px;color:var(--accent);font-weight:800}.button{border:0;background:var(--accent);color:white;padding:13px 16px;border-radius:12px;font-weight:700;font-size:15px;width:100%;margin-top:10px;cursor:pointer}.secondary{background:#eeeafc;color:var(--accent)}.note{font-size:12px;color:var(--muted);margin-top:10px}.saved{margin-top:12px}.saved-item{border:1px solid var(--line);padding:12px;border-radius:12px;margin:8px 0}.saved-item .row{padding:2px 0}.small{font-size:13px;color:var(--muted)}@media(max-width:440px){.grid{grid-template-columns:1fr}.full{grid-column:auto}main{padding:15px 12px}}
+</style>
+</head>
+<body>
+<main>
+<h1>📦 Расчёт общего груза</h1>
+<p>Китай → Россия → Москва → Стерлитамак. Закупка, карго и местная транспортная компания учитываются отдельно.</p>
+<section class="card">
+<h2>1. Закупка в Китае 🇨🇳</h2>
+<div class="grid">
+<div class="field"><label>Сумма товаров (¥)</label><input id="yuan" type="number" min="0" step="0.01" value="1600"></div>
+<div class="field"><label>Курс юаня (₽)</label><input id="yuanRate" type="number" min="0" step="0.01" value="12"></div>
+</div>
+<div class="row"><span>Закупка в рублях</span><strong id="purchaseRub">—</strong></div>
+</section>
+<section class="card">
+<h2>2. Карго Китай → Россия 🚛</h2>
+<div class="grid">
+<div class="field"><label>Вес груза с коробкой (кг)</label><input id="weight" type="number" min="0" step="0.01" value="29"></div>
+<div class="field"><label>Стоимость карго ($)</label><input id="cargoUsd" type="number" min="0" step="0.01" value="128"></div>
+<div class="field full"><label>Курс доллара (₽)</label><input id="usdRate" type="number" min="0" step="0.01" value="92"></div>
+</div>
+<div class="row"><span>Карго в рублях</span><strong id="cargoRub">—</strong></div>
+<div class="row"><span>Карго за 1 кг</span><strong id="cargoPerKg">—</strong></div>
+</section>
+<section class="card">
+<h2>3. ТК Москва → Стерлитамак 📦</h2>
+<div class="grid">
+<div class="field"><label>Транспортная компания</label><input id="tkName" placeholder="Например: ПЭК, СДЭК, КИТ"></div>
+<div class="field"><label>Стоимость ТК (₽)</label><input id="tkRub" type="number" min="0" step="0.01" placeholder="Введи стоимость"></div>
+</div>
+<p class="note">Этот этап оплачивается отдельно и зависит от выбранной ТК. Укажи фактическую сумму из квитанции.</p>
+</section>
+<section class="card">
+<h2>Итог по грузу 💰</h2>
+<div class="result">
+<div class="row"><span>Товары</span><strong id="outPurchase">—</strong></div>
+<div class="row"><span>Карго</span><strong id="outCargo">—</strong></div>
+<div class="row"><span>ТК до Стерлитамака</span><strong id="outTk">—</strong></div>
+<hr style="border:0;border-top:1px solid #dcd5fa">
+<div class="row"><span><b>Общие расходы</b></span><strong class="total" id="grand">—</strong></div>
+<div class="row"><span>Расходы на 1 кг (с ТК)</span><strong id="perKgAll">—</strong></div>
+<div class="row"><span>Расходы на 1 кг без ТК</span><strong id="perKgNoTk">—</strong></div>
+</div>
+<button class="button" id="save">Сохранить этот груз</button>
+<button class="button secondary" id="clear">Очистить поля</button>
+<p class="note">Сохранённые расчёты остаются в этом браузере/телефоне и не синхронизируются автоматически между устройствами.</p>
+</section>
+<section class="card saved">
+<h2>Сохранённые грузы 🧾</h2>
+<div id="savedList" class="small">Пока нет сохранённых грузов.</div>
+<button class="button secondary" id="clearSaved">Удалить сохранённые расчёты</button>
+</section>
+</main>
+<script>
+const ids=['yuan','yuanRate','weight','cargoUsd','usdRate','tkName','tkRub'];
+const $=id=>document.getElementById(id);
+const num=id=>Number($(id).value)||0;
+const rub=n=>n.toLocaleString('ru-RU',{style:'currency',currency:'RUB',maximumFractionDigits:2});
+function calc(){
+ const purchase=num('yuan')*num('yuanRate'), cargo=num('cargoUsd')*num('usdRate'), tk=num('tkRub'), w=num('weight'), total=purchase+cargo+tk;
+ $('purchaseRub').textContent=rub(purchase); $('cargoRub').textContent=rub(cargo);
+ $('cargoPerKg').textContent=w>0?rub(cargo/w):'—'; $('outPurchase').textContent=rub(purchase);
+ $('outCargo').textContent=rub(cargo); $('outTk').textContent=rub(tk);
+ $('grand').textContent=rub(total); $('perKgAll').textContent=w>0?rub(total/w):'—';
+ $('perKgNoTk').textContent=w>0?rub((purchase+cargo)/w):'—';
+ return {yuan:num('yuan'),yuanRate:num('yuanRate'),weight:w,cargoUsd:num('cargoUsd'),usdRate:num('usdRate'),tkName:$('tkName').value,tkRub:tk,purchase,cargo,total,perKg:w>0?total/w:0};
+}
+ids.forEach(id=>$(id).addEventListener('input',calc));calc();
+const storageKey='chinaCargoSavedV1';
+function getSaved(){try{return JSON.parse(localStorage.getItem(storageKey)||'[]')}catch(e){return []}}
+function renderSaved(){let items=getSaved();$('savedList').innerHTML=items.length?items.map((x,i)=>`<div class="saved-item"><div><b>Груз ${i+1}</b> <span class="small">${x.tkName||'ТК не указана'}</span></div><div class="row"><span>Вес: ${x.weight} кг</span><strong>${rub(x.total)}</strong></div><div class="small">Товары ${rub(x.purchase)} · Карго ${rub(x.cargo)} · ТК ${rub(x.tkRub)}</div></div>`).join(''):'Пока нет сохранённых грузов.'}
+$('save').addEventListener('click',()=>{let x=calc();let a=getSaved();a.unshift({...x,date:new Date().toLocaleString('ru-RU')});localStorage.setItem(storageKey,JSON.stringify(a));renderSaved();alert('Расчёт сохранён на этом устройстве!')});
+$('clear').addEventListener('click',()=>{ids.forEach(id=>$(id).value='');calc()});
+$('clearSaved').addEventListener('click',()=>{if(confirm('Удалить все сохранённые расчёты на этом устройстве?')){localStorage.removeItem(storageKey);renderSaved()}});
+renderSaved();
+</script>
+</body></html>
